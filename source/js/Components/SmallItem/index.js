@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+/**
+ * Component for rendering single-line form items
+ */
 class SimpleItem extends Component {
   constructor(props) {
     super(props);
