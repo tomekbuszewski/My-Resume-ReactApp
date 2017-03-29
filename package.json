@@ -21,6 +21,7 @@
     "webpack": "^2.2.1"
   },
   "scripts": {
-    "watch": "webpack -w"
+    "watch": "webpack -w",
+    "prod": "webpack -p"
   }
 }

@@ -1,6 +1,10 @@
 # Resume Dashboard
 Simple dashboard with three editable sections. Nothing fancy, just a demo of what React is capable of with really little work.
 
+Favicon stolen from [favicon.cc](http://www.favicon.cc/?action=icon&file_id=893971)
+
+Live version: [tb-resume-app.surge.sh](http://tb-resume-app.surge.sh/)
+
 ---
 
 ## Files
