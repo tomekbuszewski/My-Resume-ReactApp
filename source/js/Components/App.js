@@ -37,23 +37,10 @@ class App extends Component {
       ]
     };
 
-    this.state = {
-      pic: true,
-      details: {
-        editable: false,
-        form: false
-      },
-
-      work: {
-        editable: false,
-        form: false
-      },
-
-      education: {
-        editable: false,
-        form:     false
-      }
-    };
+    /**
+     * We're keeping initial state very light and fill it as user progresses in the app
+     */
+    this.state = {};
 
     this.addField = this.addField.bind(this);
     this.uploadPicture = this.uploadPicture.bind(this);
@@ -151,24 +138,27 @@ class App extends Component {
   /**
    * Method for rendering <Section /> with some additions
    * @param {String} title - section title
-   * @param {String} slug - section slug, must correspond with data and state
+   * @param {String} slug - section slug, must correspond with data
    */
   renderCombinedSection(title, slug) {
+    const editable = {}.hasOwnProperty.call(this.state, slug) ? this.state[slug].editable : false;
+    const form = {}.hasOwnProperty.call(this.state, slug) ? this.state[slug].form : false;
+
     return (
       <Section
         title={title}
-        button={{ 'label': this.generateToggleMessage(this.state[slug].editable), 'action': () => { this.updateState(slug, 'editable'); } }}
+        button={{ 'label': this.generateToggleMessage(editable), 'action': () => { this.updateState(slug, 'editable'); } }}
       >
         <div className="columns">
           {slug === 'details'
-            ? this.state[slug].editable
+            ? editable
               ? this.renderImageUploader() : <div className="column is-2"><img src={this.data.pic} alt="" className="image" /></div>
             : null
           }
           <div className="column">
             {this.data[slug].map((item, i) => {
               return <Item
-                editable={!this.state[slug].editable}
+                editable={!editable}
                 key={`work--${i}`}
                 field={item.field}
                 value={item.value}
@@ -176,8 +166,8 @@ class App extends Component {
                 group="work" />
             })}
 
-            {this.state[slug].editable && !this.state[slug].form ? <div className="column is-offset-2"><Button label="Add new item" onClick={() => {this.updateState(slug, 'form')}} /></div> : null}
-            {this.state[slug].editable && this.state[slug].form ? this.renderForm(slug) : null}
+            {editable && !form ? <div className="column is-offset-2"><Button label="Add new item" onClick={() => {this.updateState(slug, 'form')}} /></div> : null}
+            {editable && form ? this.renderForm(slug) : null}
           </div>
         </div>
       </Section>
