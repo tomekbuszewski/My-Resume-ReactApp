@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
 import Dropzone from 'react-dropzone';
 
 import PageHeader from './PageHeader';
 import Section from './Section';
 import Item from './SmallItem';
 import Button from './Button';
+
+import expect from '../Services/expect';
+
+import { PLEASE_REVIEW, EDIT_THIS_SECTION, FINISH_EDITING, ADD, DRAG_YOUR_PHOTOS } from '../Helpers/strings';
 
 /**
  * Simple app for creating and editing your resume.
@@ -40,9 +43,15 @@ class App extends Component {
     /**
      * We're keeping initial state very light and fill it as user progresses in the app
      */
-    this.state = {};
+    this.state = {
+      updated: + new Date()
+    };
 
+    /**
+     * Bindings
+     */
     this.addField = this.addField.bind(this);
+    this.removeField = this.removeField.bind(this);
     this.uploadPicture = this.uploadPicture.bind(this);
   }
 
@@ -67,7 +76,7 @@ class App extends Component {
       /**
        * And definitely some better notifications, gosh.
        */
-      alert('Please review your form');
+      alert(PLEASE_REVIEW);
     }
   }
 
@@ -77,9 +86,13 @@ class App extends Component {
    * @returns {string}
    */
   generateToggleMessage(cond) {
-    return cond ? 'Finish editing' : 'Edit this section';
+    return cond ? FINISH_EDITING : EDIT_THIS_SECTION;
   }
 
+  /**
+   * Simple picture upload
+   * @param {Object} f - file object
+   */
   uploadPicture(f) {
     this.data.pic = f[0].preview;
 
@@ -87,7 +100,6 @@ class App extends Component {
       pic: true
     })
   }
-
 
   /**
    * Method for toggling editable groups
@@ -98,10 +110,31 @@ class App extends Component {
     this.setState({
       [group]: {
         ...this.state[group],
-        [what]: !this.state[group][what]
+        [what]: expect.objectToHave(this.state, group) ? !this.state[group][what] : true
       }
     });
   }
+
+  /**
+   * Method for removing fields in the data object
+   * @param {String} group - which group to query
+   * @param {String} field - what is the field in the object
+   * @param {String} value - what is the value in the object
+   */
+  removeField(group, field, value) {
+    const obj = this.data[group].filter(o => {
+      return o.field === field && o.value === value;
+    });
+
+    const pos = this.data[group].indexOf(obj[0]);
+
+    this.data[group].splice(pos, 1);
+
+    this.setState({
+      updated: + new Date()
+    })
+  }
+
   /**
    * Image upload render
    * @returns {XML}
@@ -112,7 +145,7 @@ class App extends Component {
         <Dropzone multiple={false} onDrop={this.uploadPicture}>
           {this.state.pic
             ? <img src={this.data.pic} alt="" className="image" />
-            : <div className="tag is-light">Drag and drop your photo here</div>
+            : <div className="tag is-light">{DRAG_YOUR_PHOTOS}</div>
           }
         </Dropzone>
       </div>
@@ -130,19 +163,21 @@ class App extends Component {
         <div className="column is-3"><input type="text" className="input" placeholder="Label" ref="formLabel" /></div>
         <div className="column"><div className="field"><input type="text" className="input" placeholder="Value" ref="formValue" /></div></div>
         <input type="hidden" value={group} ref="formGroup" />
-        <div className="column is-1"><button type="submit" className="button">Add</button></div>
+        <div className="column is-1"><button type="submit" className="button">{ADD}</button></div>
       </form>
     )
   }
 
   /**
-   * Method for rendering <Section /> with some additions
+   * Method for rendering <Section /> with some additions. I haven't moved this into separate component,
+   * because this is used only here.
    * @param {String} title - section title
    * @param {String} slug - section slug, must correspond with data
    */
   renderCombinedSection(title, slug) {
-    const editable = {}.hasOwnProperty.call(this.state, slug) ? this.state[slug].editable : false;
-    const form = {}.hasOwnProperty.call(this.state, slug) ? this.state[slug].form : false;
+    const hasState = expect.objectToHave(this.state, slug);
+    const editable = hasState ? this.state[slug].editable : false;
+    const form = hasState ? this.state[slug].form : false;
 
     return (
       <Section
@@ -162,8 +197,9 @@ class App extends Component {
                 key={`work--${i}`}
                 field={item.field}
                 value={item.value}
-                ref={`my-details--${item.field}`}
-                group="work" />
+                ref={`${slug}--${item.field}`}
+                delete={this.removeField}
+                group={slug} />
             })}
 
             {editable && !form ? <div className="column is-offset-2"><Button label="Add new item" onClick={() => {this.updateState(slug, 'form')}} /></div> : null}
@@ -186,4 +222,4 @@ class App extends Component {
   }
 }
 
-render(<App />, document.querySelector('#root'));
+export default App;
