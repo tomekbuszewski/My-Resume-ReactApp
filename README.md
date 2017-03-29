@@ -20,7 +20,7 @@ Sass (SCSS) consists of `components` directory and `style.scss` file.
 * `PageHeader` — stateless component for creating page headers
 * `Section` — stateless component for creating wrapping sections
 * `SmallItem` — stateless component for section items
-* `App.js` — main application file
+* `App` — main application file
 
 ### `Helpers`
 * `strings.js` — collection of strings for inclusion in other files
